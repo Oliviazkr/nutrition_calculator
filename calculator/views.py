@@ -134,32 +134,61 @@ def import_csv(request):
         if form.is_valid():
             csv_file = request.FILES['csv_file']
             try:
+                import pandas as pd
                 df = pd.read_csv(csv_file)
 
                 created = 0
                 skipped = 0
 
-                for _, row in df.iterrows():
-                    # 根据CSV列名映射（你可以根据实际CSV调整）
-                    name = row.get('name') or row.get('food') or row.get('Food')
-
-                    if name and not FoodItem.objects.filter(name=name).exists():
-                        FoodItem.objects.create(
-                            name=name,
-                            category=row.get('category', 'other'),
-                            calories=float(row.get('calories', 0)),
-                            protein=float(row.get('protein', 0)),
-                            carbs=float(row.get('carbs', 0)),
-                            fat=float(row.get('fat', 0)),
-                            fiber=float(row.get('fiber', 0)) if 'fiber' in row else 0,
-                            sugar=float(row.get('sugar', 0)) if 'sugar' in row else 0,
-                        )
-                        created += 1
+                def guess_category(name):
+                    name_lower = name.lower()
+                    if 'cheese' in name_lower or 'milk' in name_lower:
+                        return 'dairy'
+                    elif 'chicken' in name_lower or 'beef' in name_lower or 'pork' in name_lower:
+                        return 'meat'
+                    elif 'fish' in name_lower or 'salmon' in name_lower or 'tuna' in name_lower:
+                        return 'seafood'
+                    elif 'apple' in name_lower or 'banana' in name_lower or 'fruit' in name_lower:
+                        return 'fruits'
+                    elif 'rice' in name_lower or 'pasta' in name_lower or 'bread' in name_lower:
+                        return 'grains'
+                    elif 'pizza' in name_lower or 'burger' in name_lower or 'sandwich' in name_lower:
+                        return 'snacks'
                     else:
+                        return 'other'
+
+                for _, row in df.iterrows():
+                    name = row.get('food')
+                    if pd.isna(name):
+                        continue
+                    name = str(name).strip()
+
+                    if FoodItem.objects.filter(name=name).exists():
                         skipped += 1
+                        continue
+
+                    calories = float(row.get('Caloric Value', 0)) if pd.notna(row.get('Caloric Value')) else 0
+                    fat = float(row.get('Fat', 0)) if pd.notna(row.get('Fat')) else 0
+                    carbs = float(row.get('Carbohydrates', 0)) if pd.notna(row.get('Carbohydrates')) else 0
+                    protein = float(row.get('Protein', 0)) if pd.notna(row.get('Protein')) else 0
+                    fiber = float(row.get('Dietary Fiber', 0)) if pd.notna(row.get('Dietary Fiber')) else 0
+                    sugar = float(row.get('Sugars', 0)) if pd.notna(row.get('Sugars')) else 0
+
+                    FoodItem.objects.create(
+                        name=name,
+                        category=guess_category(name),
+                        calories=calories,
+                        protein=protein,
+                        carbs=carbs,
+                        fat=fat,
+                        fiber=fiber,
+                        sugar=sugar,
+                    )
+                    created += 1
 
                 messages.success(request, f'导入完成！新增 {created} 条，跳过 {skipped} 条。')
                 return redirect('food_list')
+
             except Exception as e:
                 messages.error(request, f'导入失败：{str(e)}')
     else:
