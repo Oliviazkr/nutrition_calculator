@@ -1,46 +1,46 @@
 {% extends 'base.html' %}
 
-{% block title %}食物库管理{% endblock %}
+{% block title %}Food Library Management{% endblock %}
 
 {% block content %}
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-    <h1>📚 食物库管理</h1>
+    <h1>📚 Food Library Management</h1>
     <div>
-        <a href="{% url 'food_add' %}" class="btn btn-success">➕ 添加食物</a>
-        <a href="{% url 'import_csv' %}" class="btn btn-primary">📂 导入CSV</a>
+        <a href="{% url 'food_add' %}" class="btn btn-success">➕ Add Food</a>
+        <a href="{% url 'import_csv' %}" class="btn btn-primary">📂 Import CSV</a>
     </div>
 </div>
 
 <div class="card">
-    <!-- 搜索和筛选 -->
+    <!-- Search and Filter -->
     <form method="get" class="filter-bar" style="margin-bottom: 1.5rem;">
-        <input type="text" name="search" class="form-control" placeholder="搜索食物..." value="{{ search }}" style="flex: 1;">
+        <input type="text" name="search" class="form-control" placeholder="Search food..." value="{{ search }}" style="flex: 1;">
         <select name="category" class="form-control" style="width: 150px;">
-            <option value="">全部分类</option>
+            <option value="">All Categories</option>
             {% for cat in categories %}
                 <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
             {% endfor %}
         </select>
-        <button type="submit" class="btn btn-primary">搜索</button>
+        <button type="submit" class="btn btn-primary">Search</button>
         {% if search or selected_category %}
-            <a href="{% url 'food_list' %}" class="btn btn-secondary">清除</a>
+            <a href="{% url 'food_list' %}" class="btn btn-secondary">Clear</a>
         {% endif %}
     </form>
-    
-    <!-- 统计信息 -->
-    <p style="margin-bottom: 1rem; color: #666;">共 {{ foods.count }} 种食物</p>
-    
-    <!-- 食物表格 -->
+
+    <!-- Statistics -->
+    <p style="margin-bottom: 1rem; color: #666;">Total: {{ foods.count }} food items</p>
+
+    <!-- Food Table -->
     <table>
         <thead>
             <tr>
-                <th>名称</th>
-                <th>分类</th>
-                <th>卡路里 (kcal/100g)</th>
-                <th>蛋白质 (g)</th>
-                <th>碳水 (g)</th>
-                <th>脂肪 (g)</th>
-                <th>操作</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Calories (kcal/100g)</th>
+                <th>Protein (g)</th>
+                <th>Carbs (g)</th>
+                <th>Fat (g)</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -53,14 +53,14 @@
                     <td>{{ food.carbs }}</td>
                     <td>{{ food.fat }}</td>
                     <td>
-                        <a href="{% url 'food_edit' food.pk %}" class="btn btn-secondary btn-sm">编辑</a>
-                        <a href="{% url 'food_delete' food.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('确定删除「{{ food.name }}」吗？')">删除</a>
+                        <a href="{% url 'food_edit' food.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+                        <a href="{% url 'food_delete' food.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete "{{ food.name }}"?')">Delete</a>
                     </td>
                 </tr>
             {% empty %}
                 <tr>
                     <td colspan="7" style="text-align: center; padding: 2rem; color: #999;">
-                        暂无食物数据，<a href="{% url 'food_add' %}">添加第一个</a> 或 <a href="{% url 'import_csv' %}">导入CSV</a>
+                        No food data available. <a href="{% url 'food_add' %}">Add your first food</a> or <a href="{% url 'import_csv' %}">Import CSV</a>
                     </td>
                 </tr>
             {% endfor %}
