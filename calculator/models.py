@@ -3,35 +3,35 @@ from django.contrib.auth.models import User
 
 
 class FoodItem(models.Model):
-    """食物/食材模型"""
+    """Food/Ingredient Model"""
 
     CATEGORY_CHOICES = [
-        ('vegetables', '蔬菜'),
-        ('fruits', '水果'),
-        ('meat', '肉类'),
-        ('seafood', '海鲜'),
-        ('dairy', '乳制品'),
-        ('grains', '谷物'),
-        ('nuts', '坚果'),
-        ('beverages', '饮料'),
-        ('snacks', '零食'),
-        ('other', '其他'),
+        ('vegetables', 'Vegetables'),
+        ('fruits', 'Fruits'),
+        ('meat', 'Meat'),
+        ('seafood', 'Seafood'),
+        ('dairy', 'Dairy'),
+        ('grains', 'Grains'),
+        ('nuts', 'Nuts'),
+        ('beverages', 'Beverages'),
+        ('snacks', 'Snacks'),
+        ('other', 'Other'),
     ]
 
-    name = models.CharField(max_length=200, unique=True, verbose_name='名称')
-    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='other', verbose_name='分类')
+    name = models.CharField(max_length=200, unique=True, verbose_name='Name')
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='other', verbose_name='Category')
 
-    # 每100g的营养信息
-    calories = models.FloatField(default=0, verbose_name='卡路里 (kcal/100g)')
-    protein = models.FloatField(default=0, verbose_name='蛋白质 (g/100g)')
-    carbs = models.FloatField(default=0, verbose_name='碳水化合物 (g/100g)')
-    fat = models.FloatField(default=0, verbose_name='脂肪 (g/100g)')
-    fiber = models.FloatField(default=0, verbose_name='膳食纤维 (g/100g)')
-    sugar = models.FloatField(default=0, verbose_name='糖 (g/100g)')
+    # Nutrition information per 100g
+    calories = models.FloatField(default=0, verbose_name='Calories (kcal/100g)')
+    protein = models.FloatField(default=0, verbose_name='Protein (g/100g)')
+    carbs = models.FloatField(default=0, verbose_name='Carbohydrates (g/100g)')
+    fat = models.FloatField(default=0, verbose_name='Fat (g/100g)')
+    fiber = models.FloatField(default=0, verbose_name='Dietary Fiber (g/100g)')
+    sugar = models.FloatField(default=0, verbose_name='Sugar (g/100g)')
 
-    # 其他信息
-    serving_size = models.FloatField(default=100, verbose_name='标准份量(g)')
-    serving_name = models.CharField(max_length=50, default='100g', verbose_name='份量名称')
+    # Other information
+    serving_size = models.FloatField(default=100, verbose_name='Serving Size (g)')
+    serving_name = models.CharField(max_length=50, default='100g', verbose_name='Serving Name')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -41,25 +41,25 @@ class FoodItem(models.Model):
 
     class Meta:
         ordering = ['name']
-        verbose_name = '食物'
-        verbose_name_plural = '食物'
+        verbose_name = 'Food'
+        verbose_name_plural = 'Foods'
 
 
 class CalculationHistory(models.Model):
-    """计算历史记录"""
+    """Calculation History Model"""
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    name = models.CharField(max_length=200, default='My Meal', verbose_name='名称')
+    name = models.CharField(max_length=200, default='My Meal', verbose_name='Name')
 
-    # 存储为 JSON
-    items = models.TextField(verbose_name='食物列表(JSON)')
+    # Stored as JSON
+    items = models.TextField(verbose_name='Food Items (JSON)')
 
-    # 计算结果
-    total_weight = models.FloatField(default=0, verbose_name='总重量(g)')
-    total_calories = models.FloatField(default=0, verbose_name='总卡路里')
-    total_protein = models.FloatField(default=0, verbose_name='总蛋白质')
-    total_carbs = models.FloatField(default=0, verbose_name='总碳水')
-    total_fat = models.FloatField(default=0, verbose_name='总脂肪')
+    # Calculation results
+    total_weight = models.FloatField(default=0, verbose_name='Total Weight (g)')
+    total_calories = models.FloatField(default=0, verbose_name='Total Calories')
+    total_protein = models.FloatField(default=0, verbose_name='Total Protein')
+    total_carbs = models.FloatField(default=0, verbose_name='Total Carbohydrates')
+    total_fat = models.FloatField(default=0, verbose_name='Total Fat')
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -68,5 +68,5 @@ class CalculationHistory(models.Model):
 
     class Meta:
         ordering = ['-created_at']
-        verbose_name = '计算历史'
-        verbose_name_plural = '计算历史'
+        verbose_name = 'Calculation History'
+        verbose_name_plural = 'Calculation History'
