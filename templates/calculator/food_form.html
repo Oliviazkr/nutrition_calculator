@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 2rem auto;">
+    <div class="card">
+        <h2 style="margin-bottom: 1.5rem;">{% if food %}✏️ 编辑{% else %}➕ 添加{% endif %}食物</h2>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label>食物名称</label>
+                {{ form.name }}
+            </div>
+
+            <div class="form-group">
+                <label>分类</label>
+                {{ form.category }}
+            </div>
+
+            <div class="grid-3">
+                <div class="form-group">
+                    <label>卡路里 (kcal/100g)</label>
+                    {{ form.calories }}
+                </div>
+                <div class="form-group">
+                    <label>蛋白质 (g/100g)</label>
+                    {{ form.protein }}
+                </div>
+                <div class="form-group">
+                    <label>碳水 (g/100g)</label>
+                    {{ form.carbs }}
+                </div>
+                <div class="form-group">
+                    <label>脂肪 (g/100g)</label>
+                    {{ form.fat }}
+                </div>
+                <div class="form-group">
+                    <label>膳食纤维 (g/100g)</label>
+                    {{ form.fiber }}
+                </div>
+                <div class="form-group">
+                    <label>糖 (g/100g)</label>
+                    {{ form.sugar }}
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-primary">保存</button>
+                <a href="{% url 'food_list' %}" class="btn btn-secondary">取消</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

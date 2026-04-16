@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}计算历史{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom: 1.5rem;">📊 计算历史</h1>
+
+<div class="card">
+    {% if history %}
+        <table>
+            <thead>
+                <tr>
+                    <th>名称</th>
+                    <th>总重量</th>
+                    <th>卡路里</th>
+                    <th>蛋白质</th>
+                    <th>碳水</th>
+                    <th>脂肪</th>
+                    <th>时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in history %}
+                    <tr>
+                        <td><strong>{{ record.name }}</strong></td>
+                        <td>{{ record.total_weight }}g</td>
+                        <td>{{ record.total_calories }} kcal</td>
+                        <td>{{ record.total_protein }}g</td>
+                        <td>{{ record.total_carbs }}g</td>
+                        <td>{{ record.total_fat }}g</td>
+                        <td>{{ record.created_at|date:"Y-m-d H:i" }}</td>
+                        <td>
+                            <a href="{% url 'history_detail' record.pk %}" class="btn btn-secondary btn-sm">查看</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p style="text-align: center; padding: 2rem; color: #999;">
+            暂无计算历史，<a href="{% url 'home' %}">去计算器</a>试试吧！
+        </p>
+    {% endif %}
+</div>
+{% endblock %}

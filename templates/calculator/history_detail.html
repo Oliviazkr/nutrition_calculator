@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}历史详情{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 1.5rem;">
+    <a href="{% url 'history' %}" class="btn btn-secondary">← 返回列表</a>
+</div>
+
+<div class="card">
+    <h2 style="margin-bottom: 1rem;">{{ record.name }}</h2>
+    <p style="color: #666; margin-bottom: 1.5rem;">创建于 {{ record.created_at|date:"Y-m-d H:i:s" }}</p>
+
+    <div class="nutrition-summary" style="margin-bottom: 2rem;">
+        <p style="text-align: center; margin-bottom: 1rem;">总重量: {{ record.total_weight }}g</p>
+        <div class="nutrition-grid">
+            <div>
+                <div class="nutrition-value">{{ record.total_calories }}</div>
+                <div class="nutrition-label">卡路里 (kcal)</div>
+            </div>
+            <div>
+                <div class="nutrition-value">{{ record.total_protein }}</div>
+                <div class="nutrition-label">蛋白质 (g)</div>
+            </div>
+            <div>
+                <div class="nutrition-value">{{ record.total_carbs }}</div>
+                <div class="nutrition-label">碳水 (g)</div>
+            </div>
+            <div>
+                <div class="nutrition-value">{{ record.total_fat }}</div>
+                <div class="nutrition-label">脂肪 (g)</div>
+            </div>
+        </div>
+    </div>
+
+    <h3 style="margin-bottom: 1rem;">食物明细</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>食物名称</th>
+                <th>重量</th>
+                <th>卡路里</th>
+                <th>蛋白质</th>
+                <th>碳水</th>
+                <th>脂肪</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+                <tr>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.weight }}g</td>
+                    <td>{{ item.calories }} kcal</td>
+                    <td>{{ item.protein }}g</td>
+                    <td>{{ item.carbs }}g</td>
+                    <td>{{ item.fat }}g</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

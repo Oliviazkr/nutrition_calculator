@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+
+{% block title %}营养计算器{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom: 1.5rem;">🥗 营养计算器</h1>
+
+<div class="grid-2">
+    <!-- 左侧：食物选择 -->
+    <div class="card">
+        <h3 style="margin-bottom: 1rem;">选择食物</h3>
+
+        <div class="search-box">
+            <input type="text" id="searchInput" class="form-control" placeholder="搜索食物...">
+        </div>
+
+        <div class="filter-bar">
+            <select id="categoryFilter" class="form-control" style="width: auto;">
+                <option value="">全部分类</option>
+                {% for cat in categories %}
+                    <option value="{{ cat }}">{{ cat }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div id="foodList" class="food-selector">
+            {% for food in foods %}
+                <div class="food-item" data-id="{{ food.id }}" data-name="{{ food.name }}" data-calories="{{ food.calories }}" data-category="{{ food.category }}">
+                    <div>
+                        <strong>{{ food.name }}</strong>
+                        <span class="badge">{{ food.get_category_display }}</span>
+                    </div>
+                    <div style="color: #666;">{{ food.calories }} kcal/100g</div>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if not user.is_authenticated %}
+            <p style="margin-top: 1rem; color: #666;">
+                💡 <a href="{% url 'login' %}">登录</a>后可以保存计算历史！
+            </p>
+        {% endif %}
+    </div>
+
+    <!-- 右侧：已选食物和计算结果 -->
+    <div class="card">
+        <h3 style="margin-bottom: 1rem;">已选食物</h3>
+
+        <div id="selectedFoodsContainer">
+            <p id="emptyMessage" style="color: #999; text-align: center; padding: 2rem;">
+                点击左侧食物添加到列表
+            </p>
+        </div>
+
+        <div id="selectedList" style="display: none;">
+            <div id="selectedItems"></div>
+
+            <hr style="margin: 1rem 0; border: none; border-top: 1px solid #eee;">
+
+            <button id="calculateBtn" class="btn btn-primary" style="width: 100%;">
+                🔢 计算营养
+            </button>
+        </div>
+
+        <!-- 计算结果 -->
+        <div id="results" style="display: none; margin-top: 1.5rem;">
+            <div class="nutrition-summary">
+                <h4 style="margin-bottom: 1rem; text-align: center;">营养汇总</h4>
+                <p style="text-align: center; margin-bottom: 1rem;">总重量: <span id="totalWeight">0</span>g</p>
+                <div class="nutrition-grid">
+                    <div>
+                        <div class="nutrition-value" id="totalCalories">0</div>
+                        <div class="nutrition-label">卡路里 (kcal)</div>
+                    </div>
+                    <div>
+                        <div class="nutrition-value" id="totalProtein">0</div>
+                        <div class="nutrition-label">蛋白质 (g)</div>
+                    </div>
+                    <div>
+                        <div class="nutrition-value" id="totalCarbs">0</div>
+                        <div class="nutrition-label">碳水 (g)</div>
+                    </div>
+                    <div>
+                        <div class="nutrition-value" id="totalFat">0</div>
+                        <div class="nutrition-label">脂肪 (g)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 1rem;">
+                <h4>详细分解</h4>
+                <div id="detailsList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let selectedFoods = [];
+
+    // 搜索功能
+    document.getElementById('searchInput').addEventListener('input', function() {
+        filterFoods();
+    });
+
+    document.getElementById('categoryFilter').addEventListener('change', function() {
+        filterFoods();
+    });
+
+    function filterFoods() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const category = document.getElementById('categoryFilter').value;
+
+        document.querySelectorAll('.food-item').forEach(item => {
+            const name = item.dataset.name.toLowerCase();
+            const cat = item.dataset.category;
+
+            const matchesSearch = name.includes(search);
+            const matchesCategory = !category || cat === category;
+
+            item.style.display = matchesSearch && matchesCategory ? 'flex' : 'none';
+        });
+    }
+
+    // 点击食物添加到列表
+    document.querySelectorAll('.food-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const id = this.dataset.id;
+            const name = this.dataset.name;
+
+            if (!selectedFoods.find(f => f.id === id)) {
+                selectedFoods.push({
+                    id: id,
+                    name: name,
+                    weight: 100
+                });
+                updateSelectedList();
+            }
+        });
+    });
+
+    function updateSelectedList() {
+        const container = document.getElementById('selectedItems');
+        const emptyMsg = document.getElementById('emptyMessage');
+        const selectedList = document.getElementById('selectedList');
+        const results = document.getElementById('results');
+
+        if (selectedFoods.length === 0) {
+            emptyMsg.style.display = 'block';
+            selectedList.style.display = 'none';
+            results.style.display = 'none';
+            return;
+        }
+
+        emptyMsg.style.display = 'none';
+        selectedList.style.display = 'block';
+
+        let html = '';
+        selectedFoods.forEach((food, index) => {
+            html += `
+                <div class="selected-item">
+                    <div>
+                        <strong>${food.name}</strong>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="number" class="weight-input" value="${food.weight}"
+                               min="1" step="1" data-index="${index}">
+                        <span>g</span>
+                        <button class="btn btn-danger btn-sm" onclick="removeFood(${index})">✕</button>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+
+        // 绑定重量变化事件
+        document.querySelectorAll('.weight-input').forEach(input => {
+            input.addEventListener('change', function() {
+                const index = this.dataset.index;
+                selectedFoods[index].weight = parseFloat(this.value) || 100;
+            });
+        });
+    }
+
+    window.removeFood = function(index) {
+        selectedFoods.splice(index, 1);
+        updateSelectedList();
+    };
+
+    // 计算营养
+    document.getElementById('calculateBtn').addEventListener('click', async function() {
+        const items = selectedFoods.map(f => ({
+            id: f.id,
+            weight: f.weight
+        }));
+
+        const response = await fetch('/calculate/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ items: items })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            displayResults(data);
+        }
+    });
+
+    function displayResults(data) {
+        document.getElementById('results').style.display = 'block';
+        document.getElementById('totalWeight').textContent = data.total_weight;
+        document.getElementById('totalCalories').textContent = data.total_calories;
+        document.getElementById('totalProtein').textContent = data.total_protein;
+        document.getElementById('totalCarbs').textContent = data.total_carbs;
+        document.getElementById('totalFat').textContent = data.total_fat;
+
+        let detailsHtml = '';
+        data.details.forEach(item => {
+            detailsHtml += `
+                <div style="padding: 0.5rem; border-bottom: 1px solid #eee;">
+                    <strong>${item.name}</strong> (${item.weight}g):
+                    ${item.calories} kcal | P:${item.protein}g | C:${item.carbs}g | F:${item.fat}g
+                </div>
+            `;
+        });
+        document.getElementById('detailsList').innerHTML = detailsHtml;
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}
