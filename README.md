@@ -131,6 +131,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgements
 
-- Data inspired by public food nutrition datasets.
+- Data is from https://www.kaggle.com/datasets/utsavdey1410/food-nutrition-dataset
 - Built as a practical learning project for web development with Django.
-```
