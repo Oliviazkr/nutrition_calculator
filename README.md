@@ -96,7 +96,6 @@ nutrition_calculator/
 ├── calculator/                 # Main Django application
 │   ├── management/commands/    # Custom management commands (e.g., import_data)
 │   ├── migrations/             # Database migration files
-│   ├── templates/calculator/   # HTML templates
 │   ├── __init__.py
 │   ├── admin.py
 │   ├── apps.py
@@ -110,6 +109,7 @@ nutrition_calculator/
 │   ├── settings.py             # Django project settings
 │   ├── urls.py                 # Root URL configuration
 │   └── wsgi.py
+├── templates/calculator/       # HTML templates
 ├── static/                     # Static files (CSS, JS, images)
 ├── db.sqlite3                  # SQLite database file
 ├── manage.py                   # Django's command-line utility
